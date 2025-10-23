@@ -8,7 +8,7 @@ const double TICK = 0.20;
 const int SCREENWIDTH = 80;
 const int SCREENHEIGHT = 25;
 const unsigned char ESCAPE = 27;
-const double CURSORBLINKSPEED = 0.5;
+const double CURSORBLINKSPEED = 0.2;
 char piece(int &x);
 const Color XCOLOR = Color::BrightMagenta;
 const Color OCOLOR = Color::BrightCyan;
@@ -31,6 +31,25 @@ void drawBorder(char headers, char sides, Color color = Color::Default)
         }
     }
     return;
+}
+
+void drawMiniBorder(char headers, char sides, int x, int y, int borderSize, Color color = Color::Default)
+{
+    string header(borderSize + 2, headers);
+    for (int i = 0; i < borderSize + 2; i++)
+    {
+        if(i == 0 || i == borderSize + 1)
+        {
+            putStringAt(x, i + y, header, color);
+        }
+        for (int j = 0; j < borderSize + 2; j++)
+        {
+            if(j == 0 || j == borderSize + 1)
+            {
+                putCharAt(j + x, i + y, sides, color);
+            }
+        }
+    }
 }
 
 void mainMenuControls()
@@ -97,6 +116,18 @@ vector<vector<int>> elementWiseMulti(vector<vector<int>> &board, vector<vector<i
     return resultant;
 }
 
+//Hadamard product
+vector<vector<int>> elementWiseMulti(vector<vector<int>> &board, vector<int> &mask, int x, int y)
+{
+    int maskSize = static_cast<int>(mask.size());
+    vector<vector<int>> resultant(maskSize, vector<int>(maskSize, 0));
+    for (size_t i = 0; i < mask.size(); i++)
+    {
+        resultant[0][i] = board[0 + y][i + x] * mask[i];
+    }
+    return resultant;
+}
+
 bool checkTinyWin(vector<vector<int>> &board, vector<vector<int>> &mask, int x, int y)
 {
     int winSize = static_cast<int>(mask.size());
@@ -127,7 +158,6 @@ bool checkTinyWin(vector<vector<int>> &board, vector<int> &mask, int x, int y)
     }
 }
 
-
 void setWinMasks(vector<vector<int>> &diagonalPos, vector<vector<int>> &diagonalNeg, int winSize)
 {
     int diagonalPosCount = 0;
@@ -151,7 +181,6 @@ void setWinMasks(vector<vector<int>> &diagonalPos, vector<vector<int>> &diagonal
     }
 }
 
-
 bool checkWinConditions(vector<vector<int>> &board, vector<vector<int>> &diagonalPos, vector<vector<int>> &diagonalNeg, vector<int> &row, vector<vector<int>> &column)
 {
     int boardSize = static_cast<int>(board.size());
@@ -173,7 +202,6 @@ bool checkWinConditions(vector<vector<int>> &board, vector<vector<int>> &diagona
     return false;
 }
 
-
 void drawBoard(vector<vector<int>> &board, vector<vector<int>> &allBoardChars, int x, int y, bool drawGrid)
 {
     if(drawGrid == false){
@@ -190,8 +218,6 @@ void drawBoard(vector<vector<int>> &board, vector<vector<int>> &allBoardChars, i
         }
     }
 }
-
-
 
 void placePiece(vector<vector<int>> &board, bool &playerTurn, int x, int y)
 {
@@ -266,7 +292,7 @@ void debugPrintAllChars(vector<vector<int>> &allBoardChars)
 void standardGameLoop(int boardSize, int winSize)
 {
     vector<vector<int>> allBoardChars(SCREENHEIGHT, vector<int>(SCREENWIDTH, 32));                 // 2d array of all pixels ascii characters in the scree space
-    vector<vector<int>> board(boardSize* boardSize, vector<int>(boardSize * boardSize, 3));
+    vector<vector<int>> board(boardSize* boardSize, vector<int>(boardSize * boardSize, -100));
     vector<vector<int>> diagonalPos(winSize, vector<int>(winSize,0)), diagonalNeg(winSize, vector<int>(winSize,0));
     vector<int> row(winSize,1);                                                                   // {1,1,1}
     vector<vector<int>> column(winSize, vector<int>(1,1));                                               // {{1},{1},{1}}
@@ -286,7 +312,7 @@ void standardGameLoop(int boardSize, int winSize)
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto previousTime = std::chrono::high_resolution_clock::now();
     double dt;
-
+    drawMiniBorder('-', '-', boardXOffset-1, boardYOffset-1, boardSize, Color::Yellow);
     drawBoard(board, allBoardChars, boardXOffset, boardYOffset, false);
     while (c != ESCAPE)  //frame loop
     {
@@ -326,15 +352,14 @@ void standardGameLoop(int boardSize, int winSize)
         }
         if(checkWinConditions(board, diagonalPos, diagonalNeg, row, column))
         {
-                putStringAt(20, 15, "WIN!!!!", Color::Green);
-        }
-        else
-        {
-            drawBoard(diagonalPos, allBoardChars, 10, 5, false);
-            drawBoard(diagonalNeg, allBoardChars, 14, 5, false);
-            drawBoard(row, allBoardChars, 18, 5, false);
-            drawBoard(column, allBoardChars, 22, 5, false);
-            putStringAt(20, 14, "playing...", Color::Green);
+            if(playerTurn)
+            {
+                putStringAt(20, 15, "X WIN!!!!", Color::Green);
+            }
+            else
+            {
+                putStringAt(20, 15, "O WIN!!!!", Color::Green);
+            }
         }
         /*
         //check win condition
@@ -376,47 +401,6 @@ int main() {
     hideCursor();
 
     //drawBorder('#', '#', Color::White);
-    standardGameLoop(5, 5);
-
-    /*
-    while (c != ESCAPE)  //frame loop
-    {
-        //input///////////////////////////////////
-        c = graphics.readKey();
-
-        //update//////////////////////////////////
-        graphics.putCharAt(i,j, ' '); //clear out in case moved
-        if (c == 'w' && i > 0)
-        {
-            i--;
-        }
-        else if (c == 's' && i < graphics.height())
-        {
-            i++;
-        }
-        else if (c == 'a' && j > 0)
-        {
-            j--;
-        }
-        else if (c == 'd' && j < graphics.width())
-        {
-            j++;
-        }
-
-        //check win condition
-        if(graphics.getCharAt(i,j) == '?')
-        {
-            graphics.putStringAt(5, 5, "You win!!", Color::Green);
-        }
-
-        graphics.putCharAt(i,j, 'o', Color::Red);
-
-        //draw//////////////////////////////////
-        graphics.draw();
-
-        //sleep//////////////////////////////////
-        graphics.sleepMs(33);  //30 fps
-    }
-    */
+    standardGameLoop(3, 3);
     return 0;
 }
