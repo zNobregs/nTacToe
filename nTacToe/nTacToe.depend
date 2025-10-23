@@ -1,0 +1,31 @@
+# depslib dependency file v1.0
+1760330292 source:c:\users\goggles\documents\programmingprojects\c++\ntactoe\ntactoe\main.cpp
+	<iostream>
+	<chrono>
+	"graphicsFramework.h"
+	<vector>
+
+1759479599 c:\users\goggles\documents\programmingprojects\c++\ntactoe\ntactoe\textgraphics.cpp
+	"textGraphics.h"
+
+1759478547 c:\users\goggles\documents\programmingprojects\c++\ntactoe\ntactoe\textgraphics.h
+	<iostream>
+	<string>
+	<thread>
+	<chrono>
+	<windows.h>
+	<conio.h>
+	<termios.h>
+	<unistd.h>
+	<fcntl.h>
+
+1758759336 c:\users\goggles\documents\programmingprojects\c++\ntactoe\ntactoe\graphicsframework.h
+	<iostream>
+	<thread>
+	<chrono>
+	<windows.h>
+	<conio.h>
+	<termios.h>
+	<unistd.h>
+	<fcntl.h>
+
